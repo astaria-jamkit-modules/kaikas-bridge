@@ -26,35 +26,27 @@ var module = (function() {
     global["klaytn_send_request"] = function(params) {
         var request = JSON.parse(params["params"]);
 
-        if ([ "klay_sendTransaction" ].includes(request["method"])) {
-            _klaytn_broadcast_transaction(params, request);
+        if (request["method"] === "klay_sendTransaction") {
+            var [ transaction ] = request["params"];
+
+            klaytn.broadcast.send(transaction)
+                .then(function(response) {
+                    webjs.callback(params["resolve"], response);
+                })
+                .catch(function(error) {
+                    webjs.callback(params["reject"], error);
+                });
         } else {
-            _klaytn_send_request(params, request);
+            var { method, params: rpc_params } = request;
+
+            klaytn.api.request(method, rpc_params)
+                .then(function(response) {
+                    webjs.callback(params["resolve"], response);
+                })
+                .catch(function(error) {
+                    webjs.callback(params["reject"], error);
+                });
         }
-    }
-
-    function _klaytn_broadcast_transaction(params, request) {
-        var [ transaction ] = request["params"];
-
-        klaytn.broadcast.send(transaction)
-            .then(function(response) {
-                webjs.callback(params["resolve"], response);
-            })
-            .catch(function(error) {
-                webjs.callback(params["reject"], error);
-            });
-    }
-
-    function _klaytn_send_request(params, request) {
-        var { method, params: rpc_params } = request;
-
-        klaytn.api.request(method, rpc_params)
-            .then(function(response) {
-                webjs.callback(params["resolve"], response);
-            })
-            .catch(function(error) {
-                webjs.callback(params["reject"], error);
-            });
     }
 
     return {
