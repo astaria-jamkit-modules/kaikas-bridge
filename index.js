@@ -3,30 +3,6 @@ var module = (function() {
           klaytn = require("klaytn-api"),
           webjs = require("webjs-helper");
 
-    function _klaytn_broadcast_transaction(params, request) {
-        var [ transaction ] = request["params"];
-
-        klaytn.broadcast.send(transaction)
-            .then(function(response) {
-                webjs.callback(params["resolve"], response);
-            })
-            .catch(function(error) {
-                webjs.callback(params["reject"], error);
-            });
-    }
-
-    function _klaytn_send_request(params, request) {
-        var { method, params: rpc_params } = request;
-
-        klaytn.api.send(method, rpc_params)
-            .then(function(response) {
-                webjs.callback(params["resolve"], response);
-            })
-            .catch(function(error) {
-                webjs.callback(params["reject"], error);
-            });
-    }
-
     global["klaytn_get_account_address"] = function(params) {
         wallet.get_account_address()
             .then(function(result) {
@@ -53,14 +29,32 @@ var module = (function() {
         if ([ "klay_sendTransaction" ].includes(request["method"])) {
             _klaytn_broadcast_transaction(params, request);
         } else {
-            if ([ "klay_getTransactionReceipt" ].includes(request["method"])) {
-                timeout(1, function() {
-                    _klaytn_send_request(params, request);
-                });
-            } else {
-                _klaytn_send_request(params, request);
-            }
+            _klaytn_send_request(params, request);
         }
+    }
+
+    function _klaytn_broadcast_transaction(params, request) {
+        var [ transaction ] = request["params"];
+
+        klaytn.broadcast.send(transaction)
+            .then(function(response) {
+                webjs.callback(params["resolve"], response);
+            })
+            .catch(function(error) {
+                webjs.callback(params["reject"], error);
+            });
+    }
+
+    function _klaytn_send_request(params, request) {
+        var { method, params: rpc_params } = request;
+
+        klaytn.api.request(method, rpc_params)
+            .then(function(response) {
+                webjs.callback(params["resolve"], response);
+            })
+            .catch(function(error) {
+                webjs.callback(params["reject"], error);
+            });
     }
 
     return {
