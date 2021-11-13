@@ -18,7 +18,7 @@ var module = (function() {
     function _klaytn_send_request(params, request) {
         var { method, params: rpc_params } = request;
 
-        klaytn.api.send(method, rpc_params)
+        klaytn.api.request(method, rpc_params)
             .then(function(response) {
                 webjs.callback(params["resolve"], response);
             })
