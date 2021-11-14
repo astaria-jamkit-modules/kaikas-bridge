@@ -56,7 +56,7 @@ window.klaytn = (function() {
         enable: function() {
             return _klaytn_get_account_address()
                 .then(function(address) {
-                    return Promise.resolve(_account = address);
+                    return Promise.resolve([ _account = address ]);
                 })
                 .catch(function(error) {
                     return Promise.reject(error);
